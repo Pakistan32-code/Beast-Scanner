@@ -1,0 +1,30 @@
+name: Build Beast Scanner
+on: [push]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Dependencies
+        run: pip install flask requests pyinstaller
+      - name: Build with PyInstaller
+        run: |
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            pyinstaller --onefile --noconsole --add-data "templates;templates" App.py
+          else
+            pyinstaller --onefile --noconsole --add-data "templates:templates" App.py
+          fi
+      - name: Upload Finished App
+        uses: actions/upload-artifact@v4
+        with:
+          name: Beast-Scanner-${{ matrix.os }}
+          path: dist/
